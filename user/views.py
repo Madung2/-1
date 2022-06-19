@@ -4,7 +4,8 @@ from rest_framework.views import APIView
 from rest_framework import permissions
 from rest_framework.response import Response
 from django.contrib.auth import login, logout, authenticate
-
+from django.db.models import F
+from user.models import UserProfile
 # Create your views here.
 
 
@@ -24,6 +25,10 @@ class UserView(APIView):
         # 2. 역참조 사용했을 때
         # one -to-one field는 기본적으로 _set이 붙지 않아서 이런 형태가 된다
         hobbys = user.userprofile.hobby.all()  # 오브젝트랑 쿼리셋을 str으로 바꿔서 보내는건 별로 바람직하지 않다
+        for hobby in hobbys:
+            hobby_members = hobby.userprofile_set.exclude(user=user).annotate(username= F('user__username')).values_list('username', flat=True)
+            hobby_members = list(hobby_members)
+            print(hobby.name, hobby_members)
         hobbys = str(hobbys)
         return Response({"message": hobbys})
 
