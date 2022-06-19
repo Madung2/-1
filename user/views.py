@@ -15,8 +15,17 @@ class UserView(APIView):
     #permission_classes = [permissions.IsAdminUser]
 
     def get(self, request):
-        # 조회
-        return Response({"message": "get method!!"})
+        # 사용자 정보 조회
+        user = request.user
+        # 1. 역참조 사용하지 않았을때
+        # user_profile = UserProfile.objects.get(user=user)
+        # hobbys = user_profile.hobby.all()
+
+        # 2. 역참조 사용했을 때
+        # one -to-one field는 기본적으로 _set이 붙지 않아서 이런 형태가 된다
+        hobbys = user.userprofile.hobby.all()  # 오브젝트랑 쿼리셋을 str으로 바꿔서 보내는건 별로 바람직하지 않다
+        hobbys = str(hobbys)
+        return Response({"message": hobbys})
 
     def post(self, request):
         # 생성
